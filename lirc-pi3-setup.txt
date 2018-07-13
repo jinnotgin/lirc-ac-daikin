@@ -1,0 +1,71 @@
+# install 
+$ sudo apt-get update
+$ sudo apt-get install lirc
+
+
+#[not needed]
+# Add the following lines to /etc/modules file
+lirc_dev
+lirc_rpi gpio_in_pin=18 gpio_out_pin=17
+
+
+#[not needed]
+# Add the following lines to /etc/lirc/hardware.conf file
+LIRCD_ARGS="--uinput --listen"
+LOAD_MODULES=true
+DRIVER="default"
+DEVICE="/dev/lirc0"
+MODULES="lirc_rpi"
+
+# Update the following line in /boot/config.txt
+dtoverlay=lirc-rpi,gpio_in_pin=18,gpio_out_pin=17
+
+# Update the following lines in /etc/lirc/lirc_options.conf
+driver    = default
+device    = /dev/lirc0
+
+$ sudo /etc/init.d/lircd stop
+$ sudo /etc/init.d/lircd start
+
+# Check status to make lirc is running
+$ sudo /etc/init.d/lircd status
+
+# to kill off lirc process if its running somehow
+$ sudo kill $(pidof lircd)
+
+# Reboot before testing
+$ reboot
+
+# To test if lirc driver is working
+$ sudo /etc/init.d/lircd stop
+$ mode2 -d /dev/lirc0
+<press a key in remote and you should see multple lines like below>
+pulse 560
+space 1706
+pulse 535
+
+
+# [not relevant]
+# to record a custom remote/register a remote device (simple ir)
+$ sudo /etc/init.d/lircd stop
+$ sudo irrecord -d /dev/lirc0 ~/lircd.conf
+# follow the instruction prompted by the above command carefully
+# at the end ~/lircd.conf file will be generated
+
+# to record a All-at-once signal (aircons)
+
+$ mode2 -m -d /dev/lirc0 > auto22.txt
+
+# edit that into the conf file
+
+# backup the original lircd.conf
+$ sudo mv /etc/lirc/lircd.conf /etc/lirc/lircd_original.conf
+$ sudo cp ~/lircd.conf /etc/lirc/lircd.conf
+$ sudo /etc/init.d/lircd start
+
+# check if lirc recognizes
+irsend list "" ""
+
+# you can test if the recorded remote works by
+$ irsend SEND_ONCE <device-name> KEY_POWER
+$ irsend SEND_ONCE <device-name> KEY_VOLUMEUP

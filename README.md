@@ -1,0 +1,1 @@
+# lirc-ac-daikin
